@@ -135,9 +135,11 @@ def processRHS(rhs):
 
 if __name__ == '__main__':
     argParser = argparse.ArgumentParser()
+    argParser.add_argument('-r', '--rule', help='specify which public rule to use')
     argParser.add_argument('grammarFile')
     argParser.add_argument('iterations', type=int, nargs=1, help='number of strings to generate')
     args = argParser.parse_args()
+
     fileStream = open(args.grammarFile)
     numIterations = args.iterations[0]
     grammar = parser.getGrammarObject(fileStream)
@@ -145,10 +147,11 @@ if __name__ == '__main__':
         #x = raw_input('Found more than one public rule. Generate a random string between them?\n')
         #if x == 'y':
         ### This next chunk has been de-indented
-        disjuncts = []
-        for rule in grammar.publicRules:
-            rhs = rule.rhs
-            disjuncts.append(rhs)
+        disjuncts = [
+            rule.rhs
+            for rule in grammar.publicRules
+            if not args.rule or rule.lhs.name == args.rule
+        ]
         newStartSymbol = gram.Disjunction(disjuncts)
         for i in range(numIterations):
             print processRHS(newStartSymbol)
